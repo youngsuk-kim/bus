@@ -7,9 +7,7 @@ const BusArrivalInfo = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [previousLocation, setPreviousLocation] = useState('');
-    const [currentLocation, setCurrentLocation] = useState('');
-    const [lastLocation, setLastLocation] = useState('');
+    const [textColor, setTextColor] = useState('black');
 
     useEffect(() => {
         const fetchBusData = async () => {
@@ -50,10 +48,15 @@ const BusArrivalInfo = () => {
     }, []);
 
     useEffect(() => {
-        // 버스 위치 변경 시 이전 위치와 전전 위치 업데이트
-        setLastLocation(previousLocation);
-        setPreviousLocation(currentLocation);
-        setCurrentLocation(busInfo && busInfo.stationNm1);
+        // 버스 위치에 따라 색상 변경
+        const location = busInfo && busInfo.stationNm1;
+        if (location) {
+            if (location.includes('삼익아파트') || location.includes('한국가스안전공사')) {
+                setTextColor('blue');
+            } else {
+                setTextColor('black');
+            }
+        }
     }, [busInfo]);
 
     if (loading) {
@@ -64,15 +67,26 @@ const BusArrivalInfo = () => {
         return <div>오류 발생: {error.message}</div>;
     }
 
-    let previousLocationDisplay = previousLocation ? `전: ${previousLocation}` : '';
-    let lastLocationDisplay = lastLocation ? `전전: ${lastLocation}` : '';
+    const location = busInfo.stationNm1;
+    let busIcon = '';
+
+    if (location.includes('삼익아파트')) {
+        busIcon = '🚌';
+    } else if (location.includes('한국가스안전공사')) {
+        busIcon = '🚌🚌';
+    }
 
     return (
         <div className="center">
             <h3>🚌 경기도 인재 개발원 🚌</h3>
-            <div style={{ padding: 10 }}>
+            <div
+                style={{
+                    color: textColor,
+                    padding: 10
+                }}
+            >
                 <strong>현재 시간:</strong> {currentTime.toLocaleTimeString()}<br />
-                <strong>버스 위치:</strong> {previousLocationDisplay} {lastLocationDisplay}
+                <strong>버스 위치:</strong> {location} {busIcon}
             </div>
             <div><strong>좌석 수:</strong> {busInfo.remainSeatCnt1}</div>
         </div>
